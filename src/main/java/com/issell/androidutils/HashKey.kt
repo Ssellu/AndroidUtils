@@ -9,65 +9,66 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 const val TAG = "HashKey"
-
-@Nullable
-fun getHashKey(@NotNull context: Context):String? {
-    val list = getApplicationSignature(context)
-    if(list.isEmpty())
-        return null
-    if(list.size == 1)
-       return list[0]
-    return list[list.size-1]
-}
-
-
-fun getApplicationSignature(
-    context: Context,
-    packageName: String = context.packageName
-): List<String> {
-    val signatureList: List<String>
-    try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            // New signature
-            val sig = context.packageManager.getPackageInfo(
-                packageName,
-                PackageManager.GET_SIGNING_CERTIFICATES
-            ).signingInfo
-            signatureList = if (sig.hasMultipleSigners()) {
-                // Send all with apkContentsSigners
-                sig.apkContentsSigners.map {
-                    val digest = MessageDigest.getInstance("SHA")
-                    digest.update(it.toByteArray())
-                    // bytesToHex(digest.digest())
-                    Base64.getEncoder().encodeToString(digest.digest())
-                }
-            } else {
-                // Send one with signingCertificateHistory
-                sig.signingCertificateHistory.map {
-                    val digest = MessageDigest.getInstance("SHA")
-                    digest.update(it.toByteArray())
-                    //bytesToHex(digest.digest())  안되면 이거랑 아랫것과 교체
-                    Base64.getEncoder().encodeToString(digest.digest())
-                }
-            }
-        } else { // under P
-            val sig =
-                context.packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
-                    .signatures
-            signatureList = sig.map {
-                val digest = MessageDigest.getInstance("SHA")
-                digest.update(it.toByteArray())
-               // bytesToHex(digest.digest())
-                Base64.getEncoder().encodeToString(digest.digest())
-            }
+class SignatureUtil{
+    companion object{
+        @Nullable
+        fun getHashKey(@NotNull context: Context):String? {
+            val list = getApplicationSignature(context)
+            if(list.isEmpty())
+                return null
+            if(list.size == 1)
+                return list[0]
+            return list[list.size-1]
         }
 
-        return signatureList
-    } catch (e: Exception) {
-        // Handle error
-    }
-    return emptyList()
-}
+
+        fun getApplicationSignature(
+            context: Context,
+            packageName: String = context.packageName
+        ): List<String> {
+            val signatureList: List<String>
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    // New signature
+                    val sig = context.packageManager.getPackageInfo(
+                        packageName,
+                        PackageManager.GET_SIGNING_CERTIFICATES
+                    ).signingInfo
+                    signatureList = if (sig.hasMultipleSigners()) {
+                        // Send all with apkContentsSigners
+                        sig.apkContentsSigners.map {
+                            val digest = MessageDigest.getInstance("SHA")
+                            digest.update(it.toByteArray())
+                            // bytesToHex(digest.digest())
+                            Base64.getEncoder().encodeToString(digest.digest())
+                        }
+                    } else {
+                        // Send one with signingCertificateHistory
+                        sig.signingCertificateHistory.map {
+                            val digest = MessageDigest.getInstance("SHA")
+                            digest.update(it.toByteArray())
+                            //bytesToHex(digest.digest())  안되면 이거랑 아랫것과 교체
+                            Base64.getEncoder().encodeToString(digest.digest())
+                        }
+                    }
+                } else { // under P
+                    val sig =
+                        context.packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+                            .signatures
+                    signatureList = sig.map {
+                        val digest = MessageDigest.getInstance("SHA")
+                        digest.update(it.toByteArray())
+                        // bytesToHex(digest.digest())
+                        Base64.getEncoder().encodeToString(digest.digest())
+                    }
+                }
+
+                return signatureList
+            } catch (e: Exception) {
+                // Handle error
+            }
+            return emptyList()
+        }
 
 //fun bytesToHex(bytes: ByteArray): String {
 //    val hexArray =
@@ -81,3 +82,6 @@ fun getApplicationSignature(
 //    }
 //    return String(hexChars)
 //}
+
+    }
+}
