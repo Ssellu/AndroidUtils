@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 const val TAG = "HashKey"
-class SignatureUtil{
+class SignatureUtils{
     companion object{
         @Nullable
         fun getHashKey(@NotNull context: Context):String? {
