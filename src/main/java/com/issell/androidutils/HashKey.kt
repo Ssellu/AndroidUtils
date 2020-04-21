@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 const val TAG = "HashKey"
+
 @Nullable
 fun getHashKey(@NotNull context: Context):String? {
     val list = getApplicationSignature(context)
